@@ -7,6 +7,8 @@ package com.example.android.justjava3;
  * in the project's AndroidManifest.xml file.
  **/
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -43,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
         }
         quantity = quantity - 1;
         displayQuantity(quantity);
-
     }
 
     /**
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     public void submitOrder(View view) {
         // Get the user name from the field
         EditText nameField = findViewById(R.id.name_field);
-        String Name = nameField.getText().toString();
+        String name = nameField.getText().toString();
 
         //Figure out if the user wants Whipped Cream topping
         CheckBox whippedCreamCheckBox = findViewById(R.id.whipped_cream_checkbox);
@@ -78,8 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
         int price = calculatePrice(hasWhippedCream, hasChocolate);
 
-        String priceMessage = createOrderSummary(Name, hasWhippedCream, hasChocolate, price);
-        displayMessage(priceMessage);
+        String priceMessage = createOrderSummary(name, hasWhippedCream, hasChocolate, price);
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Just Java order for " + name);
+        intent.putExtra(Intent.EXTRA_TEXT, priceMessage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /**
@@ -121,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             boolean addWhippedCream,
             boolean addChocolate,
             int price) {
-        String priceMessage = "Name: " + name;
+        String priceMessage = "Name:" + name;
         priceMessage += "\nAdd whipped Cream? " + addWhippedCream;
         priceMessage += "\nAdd Chocolate? " + addChocolate;
         priceMessage += "\nQuantity: " + quantity;
@@ -137,13 +145,4 @@ public class MainActivity extends AppCompatActivity {
         TextView quantityTextView = findViewById(R.id.quantity_text_view);
         quantityTextView.setText("" + number);
     }
-
-    /**
-     * This method displays the given text on the screen.
-     */
-    private void displayMessage(String message) {
-        TextView orderSummaryTextView = findViewById(R.id.order_summary_text_view);
-        orderSummaryTextView.setText(message);
-    }
-
 }
